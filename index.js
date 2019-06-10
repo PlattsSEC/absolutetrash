@@ -20,6 +20,7 @@ fs.readdir(currentDir, (err, files) => {
 function createRandomStream(){
   console.log(mp3Files);
   var fileIndex = Math.floor(Math.random()*mp3Files.length);
+  console.log(`Playing ${mp3Files[fileIndex]}...`)
   return fs.createReadStream(`${currentDir}/${mp3Files[fileIndex]}`);
 }
 
