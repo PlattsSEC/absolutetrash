@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const currentDir = path.join(process.env.HOME,'Desktop','code','discord-bot');
+const currentDir = path.join('music');
 const mp3Files = [];
 
 
