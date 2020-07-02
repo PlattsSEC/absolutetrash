@@ -26,7 +26,7 @@ fs.readFile('urls.txt', 'utf8', function (err,data) {
 console.log(URLs);
 
 
-function createRandomStream(fileName){
+function createStream(fileName){
 //  console.log(mp3Files);
 //  var fileIndex = Math.floor(Math.random()*mp3Files.length);
 //  console.log(`Playing ${mp3Files[fileIndex]}...`)
@@ -35,7 +35,7 @@ function createRandomStream(fileName){
 }
 
 
-async function downloadMP3(url){
+async function downloadMP3(url, channelConnection){
 
 const fileName = url.split("v=")[1];
 await exec(`youtube-dl -x --audio-format mp3 -o music/${fileName}.mp3 ${url}`, (error, stdout, stderr) => {
@@ -47,10 +47,8 @@ await exec(`youtube-dl -x --audio-format mp3 -o music/${fileName}.mp3 ${url}`, (
 		console.log(`stderr: ${stderr}`);
 		return;
 	}
-		console.log(`stdout: ${stdout}`);
-	        return;
+        	channelConnection.playStream(createStream(`${fileName}.mp3`));
 	});
-return `${fileName}.mp3`;
 }
 
 
@@ -58,18 +56,18 @@ return `${fileName}.mp3`;
 const commands = {
   '/trashup': async (url, message) => {
     if (message.member.voiceChannel) {
+      let channelConnection = await message.member.voiceChannel.join();
       var fn = null;
       try{
 	if(URLs.indexOf(url) < 0){
-	  fn = await downloadMP3(url);
+	  fn = await downloadMP3(url, channelConnection);
 	  URLs.push(url);
 	}else{
 	 name = url.split("v=")[1];
 	 fn = `${name}.mp3`
 	}
-        let channelConnection = await message.member.voiceChannel.join();
         message.reply('Time to trash it up');
-        channelConnection.playStream(createRandomStream(fn));
+        channelConnection.playStream(createStream(fn));
       } catch(e){
         console.log(e);
       }
