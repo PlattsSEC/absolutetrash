@@ -23,21 +23,24 @@ fs.readFile('urls.txt', 'utf8', function (err,data) {
 
 });
 
-console.log(URLs);
-
 
 function createStream(fileName){
-//  console.log(mp3Files);
-//  var fileIndex = Math.floor(Math.random()*mp3Files.length);
-//  console.log(`Playing ${mp3Files[fileIndex]}...`)
   console.log(`Playing ${fileName}...`)
   return fs.createReadStream(`music/${fileName}`);
 }
 
 
+function grabVideoID(url){
+  if (url.indexOf("v=") > 0){
+    return url.split("v=")[1];
+  }else{
+    return url.split("/")[3]
+  }
+}
+
 async function downloadMP3(url, channelConnection){
 
-const fileName = url.split("v=")[1];
+const fileName = grabVideoID(url);
 await exec(`youtube-dl -x --audio-format mp3 -o music/${fileName}.mp3 ${url}`, (error, stdout, stderr) => {
 	if (error) {
 		console.log(`error: ${error.message}`);
@@ -47,7 +50,8 @@ await exec(`youtube-dl -x --audio-format mp3 -o music/${fileName}.mp3 ${url}`, (
 		console.log(`stderr: ${stderr}`);
 		return;
 	}
-        	channelConnection.playStream(createStream(`${fileName}.mp3`));
+        	const dispatcher = channelConnection.playStream(createStream(`${fileName}.mp3`));
+	        dispatcher.setVolume(0.5);
 	});
 }
 
@@ -60,10 +64,10 @@ const commands = {
       var fn = null;
       try{
 	if(URLs.indexOf(url) < 0){
-	  fn = await downloadMP3(url, channelConnection);
 	  URLs.push(url);
+	  await downloadMP3(url, channelConnection);
 	}else{
-	 name = url.split("v=")[1];
+	 name = grabVideoID(url);
 	 fn = `${name}.mp3`
 	}
         message.reply('Time to trash it up');
